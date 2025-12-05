@@ -149,6 +149,54 @@ def receive_all_messages(
             
     return inboxes
 
+def extract_receive_all_unique_responses(
+        inbox_list: list[messenger_pb2.InboxResponse | None]
+    ) -> list[tuple[int, str, str, str]]:
+    """Function that merges multiple inbox responses, removing duplicates based on message ID. Assumes each inbox is sorted by ID.
+    Args:
+        inbox_list (list[tuple[messenger_pb2.InboxResponse, str]]): List of tuples containing inbox response and server IP
+    Returns:
+        list[tuple[int, str, str, str]]: id, msg, self_email, dest_email    
+    """
+    results = []
+    responses = []
+    counters = [0] * len(inbox_list)
+
+    # Extract messages from each inbox response
+    for i, inbox in enumerate(inbox_list):
+        response = extract_receive_all_response(inbox)
+        if response is None:
+            response = []
+        responses.append(response)
+        counters[i] = 0
+    
+    # Merge responses while removing duplicates based on message ID
+    all_read_messages = False
+    while not all_read_messages:
+        ids = [0] * len(responses)
+        min_id = (sys.maxsize, -1)  # (id, index)
+        
+        # Find minimum ID among current positions
+        for i in range(len(responses)):
+            if counters[i] < len(responses[i]):
+                current_id = responses[i][counters[i]][0]
+                ids[i] = current_id
+                if current_id < min_id[0]:
+                    min_id = (current_id, i)
+        
+        # If no more messages to read
+        if min_id[1] == -1:
+            all_read_messages = True
+        else:
+            # Add the message with minimum ID
+            results.append(responses[min_id[1]][counters[min_id[1]]])
+            
+            # Advance all counters that have this same ID (remove duplicates)
+            for i in range(len(responses)):
+                if counters[i] < len(responses[i]) and ids[i] == min_id[0]:
+                    counters[i] += 1
+
+    return results
 
 
     

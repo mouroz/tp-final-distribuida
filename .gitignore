@@ -1,1 +1,3 @@
 src/comm/grpc_generated/
+__pycache__/
+venv/

@@ -65,14 +65,16 @@ def send_to_self(addr:list[str]) -> None:
         
 
            
-    
-    inbox_list_per_server:list[tuple[messenger_pb2.InboxResponse, str]]
+    # Receive all messages
+    inbox_list_per_server:list[messenger_pb2.InboxResponse | None]
     inbox_list_per_server = cli.receive_all_messages(
         connections=connections,
         self_email="example@gmail.com",
     )
 
-    print(type(inbox_list_per_server[0]))
+    # Old code for printing per server inboxes
+
+    print("----- INBOXES PER SERVER -----")
     for i, inbox in enumerate(inbox_list_per_server):
         addr = connections[i].address
         if inbox is None:
@@ -85,6 +87,15 @@ def send_to_self(addr:list[str]) -> None:
         for message in messages:
             id, msg, self_email, dest_email = message
             print(f"server{addr}: [id: {id}, message: {msg}, received from: {self_email}]")
+
+    print("----- UNIQUE MESSAGES ACROSS ALL SERVERS -----")
+
+    # New code for printing unique messages across all servers
+    unique_messages = cli.extract_receive_all_unique_responses(inbox_list_per_server)
+
+    for message in unique_messages:
+        id, msg, self_email, dest_email = message
+        print(f"[id: {id}, message: {msg}, received from: {self_email}]")
 
 if __name__ == '__main__':
     send_to_self(["localhost:50051", "localhost:50052", "localhost:50053"])
