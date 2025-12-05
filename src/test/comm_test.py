@@ -1,15 +1,31 @@
 # Add grpc generated folder to path
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), "grpc_messenger"))
-
-
 import grpc
-import messenger_pb2
-import messenger_pb2_grpc
 
-import client as cli
-import server as ser
+
+current_test_dir = os.path.dirname(os.path.abspath(__file__))
+src_dir = os.path.dirname(current_test_dir)
+comm_dir = os.path.join(src_dir, "comm")
+generated_code_dir = os.path.join(comm_dir, "grpc_messenger")
+
+# Ensure the imports are based on the location of the py file
+if comm_dir not in sys.path:
+    sys.path.insert(0, comm_dir)
+if generated_code_dir not in sys.path:
+    sys.path.insert(0, generated_code_dir)
+
+try:
+    import client as cli
+    import server as ser
+    import messenger_pb2
+    import messenger_pb2_grpc
+except ImportError as e:
+    print(f"Import Error: {e}")
+    print(f"Debug: sys.path is currently: {sys.path}")
+    sys.exit(1)
+    
+
 
 
 def send_to_self(addr:list[str]) -> None:
@@ -32,8 +48,8 @@ def send_to_self(addr:list[str]) -> None:
         id=101, 
         connections=connections, 
         dest_message="Hello from gRPC skeleton!",
-        dest_ip="example@gmail.com",
-        dest_port=port
+        self_email="example@gmail.com",
+        dest_email="example@gmail.com"
     )
     
     for addr in failure_addrs:
@@ -43,8 +59,7 @@ def send_to_self(addr:list[str]) -> None:
     failed_recvs:list[str]
     inbox_list_per_server, failed_recvs = cli.receive_all_messages(
         connections=connections, 
-        self_ip="example@gmail.com",
-        self_port=port
+        self_email="example@gmail.com",
     )
     
     for addr in failed_recvs:
@@ -52,11 +67,11 @@ def send_to_self(addr:list[str]) -> None:
         
     for inbox_ip in inbox_list_per_server:
         inbox, ip = inbox_ip
-        messages = cli.read_inbox_response(inbox)
+        messages = cli.extract_receive_all_response(inbox)
         
-        for msg in messages:
-            id, port, port, message = msg
-            print(f"server{ip}: [message: {message} received from user {ip}:{port}]")
+        for message in messages:
+            id, msg, self_email, dest_email = message
+            print(f"server{ip}: [id: {id}, message: {msg}, received from: {self_email}]")
 
 if __name__ == '__main__':
     send_to_self(["localhost:50051"])

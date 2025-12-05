@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0fmessenger.proto\x12\tmessenger\"H\n\x0bSendRequest\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0b\n\x03msg\x18\x02 \x01(\t\x12\x10\n\x08sendport\x18\x03 \x01(\x05\x12\x0e\n\x06sendip\x18\x04 \x01(\t\"0\n\x0cSendResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"2\n\x0eReceiveRequest\x12\x10\n\x08selfport\x18\x01 \x01(\x05\x12\x0e\n\x06selfip\x18\x02 \x01(\t\"9\n\rInboxResponse\x12(\n\x08messages\x18\x01 \x03(\x0b\x32\x16.messenger.SendRequest2\x8e\x01\n\x10MessengerService\x12\x37\n\x04Send\x12\x16.messenger.SendRequest\x1a\x17.messenger.SendResponse\x12\x41\n\nReceiveAll\x12\x19.messenger.ReceiveRequest\x1a\x18.messenger.InboxResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0fmessenger.proto\x12\tmessenger\"N\n\x0bSendRequest\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0b\n\x03msg\x18\x02 \x01(\t\x12\x12\n\nself_email\x18\x03 \x01(\t\x12\x12\n\ndest_email\x18\x04 \x01(\t\"6\n\x0cSendResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x15\n\rdebug_message\x18\x02 \x01(\t\"$\n\x0eReceiveRequest\x12\x12\n\nself_email\x18\x01 \x01(\t\"9\n\rInboxResponse\x12(\n\x08messages\x18\x01 \x03(\x0b\x32\x16.messenger.SendRequest2\x8e\x01\n\x10MessengerService\x12\x37\n\x04Send\x12\x16.messenger.SendRequest\x1a\x17.messenger.SendResponse\x12\x41\n\nReceiveAll\x12\x19.messenger.ReceiveRequest\x1a\x18.messenger.InboxResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -32,13 +32,13 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'messenger_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_SENDREQUEST']._serialized_start=30
-  _globals['_SENDREQUEST']._serialized_end=102
-  _globals['_SENDRESPONSE']._serialized_start=104
-  _globals['_SENDRESPONSE']._serialized_end=152
-  _globals['_RECEIVEREQUEST']._serialized_start=154
-  _globals['_RECEIVEREQUEST']._serialized_end=204
-  _globals['_INBOXRESPONSE']._serialized_start=206
-  _globals['_INBOXRESPONSE']._serialized_end=263
-  _globals['_MESSENGERSERVICE']._serialized_start=266
-  _globals['_MESSENGERSERVICE']._serialized_end=408
+  _globals['_SENDREQUEST']._serialized_end=108
+  _globals['_SENDRESPONSE']._serialized_start=110
+  _globals['_SENDRESPONSE']._serialized_end=164
+  _globals['_RECEIVEREQUEST']._serialized_start=166
+  _globals['_RECEIVEREQUEST']._serialized_end=202
+  _globals['_INBOXRESPONSE']._serialized_start=204
+  _globals['_INBOXRESPONSE']._serialized_end=261
+  _globals['_MESSENGERSERVICE']._serialized_start=264
+  _globals['_MESSENGERSERVICE']._serialized_end=406
 # @@protoc_insertion_point(module_scope)

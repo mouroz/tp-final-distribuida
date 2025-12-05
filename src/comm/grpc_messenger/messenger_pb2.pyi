@@ -24,41 +24,41 @@ class SendRequest(google.protobuf.message.Message):
 
     ID_FIELD_NUMBER: builtins.int
     MSG_FIELD_NUMBER: builtins.int
-    SENDPORT_FIELD_NUMBER: builtins.int
-    SENDIP_FIELD_NUMBER: builtins.int
+    SELF_EMAIL_FIELD_NUMBER: builtins.int
+    DEST_EMAIL_FIELD_NUMBER: builtins.int
     id: builtins.int
     msg: builtins.str
-    sendport: builtins.int
-    """The destination port"""
-    sendip: builtins.str
-    """The destination IP"""
+    self_email: builtins.str
+    dest_email: builtins.str
     def __init__(
         self,
         *,
         id: builtins.int = ...,
         msg: builtins.str = ...,
-        sendport: builtins.int = ...,
-        sendip: builtins.str = ...,
+        self_email: builtins.str = ...,
+        dest_email: builtins.str = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["id", b"id", "msg", b"msg", "sendip", b"sendip", "sendport", b"sendport"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dest_email", b"dest_email", "id", b"id", "msg", b"msg", "self_email", b"self_email"]) -> None: ...
 
 global___SendRequest = SendRequest
 
 @typing_extensions.final
 class SendResponse(google.protobuf.message.Message):
+    """Extensibility"""
+
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     SUCCESS_FIELD_NUMBER: builtins.int
-    MESSAGE_FIELD_NUMBER: builtins.int
+    DEBUG_MESSAGE_FIELD_NUMBER: builtins.int
     success: builtins.bool
-    message: builtins.str
+    debug_message: builtins.str
     def __init__(
         self,
         *,
         success: builtins.bool = ...,
-        message: builtins.str = ...,
+        debug_message: builtins.str = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["message", b"message", "success", b"success"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["debug_message", b"debug_message", "success", b"success"]) -> None: ...
 
 global___SendResponse = SendResponse
 
@@ -66,18 +66,14 @@ global___SendResponse = SendResponse
 class ReceiveRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
-    SELFPORT_FIELD_NUMBER: builtins.int
-    SELFIP_FIELD_NUMBER: builtins.int
-    selfport: builtins.int
-    """Identifying who is asking"""
-    selfip: builtins.str
+    SELF_EMAIL_FIELD_NUMBER: builtins.int
+    self_email: builtins.str
     def __init__(
         self,
         *,
-        selfport: builtins.int = ...,
-        selfip: builtins.str = ...,
+        self_email: builtins.str = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["selfip", b"selfip", "selfport", b"selfport"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["self_email", b"self_email"]) -> None: ...
 
 global___ReceiveRequest = ReceiveRequest
 

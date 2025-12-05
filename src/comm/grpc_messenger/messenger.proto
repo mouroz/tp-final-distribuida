@@ -16,19 +16,18 @@ service MessengerService {
 message SendRequest {
   int32 id = 1;
   string msg = 2;
-  int32 sendport = 3;  // The destination port
-  string sendip = 4;   // The destination IP
+  string self_email = 3;
+  string dest_email = 4; 
 }
 
 // Extensibility
 message SendResponse {
   bool success = 1;
-  string message = 2;
+  string debug_message = 2;
 }
 
 message ReceiveRequest {
-  int32 selfport = 1; // Identifying who is asking
-  string selfip = 2;
+  string self_email = 1;
 }
 
 message InboxResponse {

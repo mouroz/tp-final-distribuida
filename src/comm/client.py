@@ -1,17 +1,25 @@
 # Add grpc generated folder to path
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), "grpc_messenger"))
-
-
 import grpc
-import messenger_pb2
-import messenger_pb2_grpc
-
-
 from dataclasses import dataclass
 
-# 1. Create a helper class to keep the channel and address together
+
+
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "grpc_messenger"))
+try: 
+    import messenger_pb2
+    import messenger_pb2_grpc
+except ImportError as e:
+    print(f"Import Error: {e}")
+    print(f"Debug: sys.path is currently: {sys.path}")
+    sys.exit(1)
+
+
+
+
+
 @dataclass
 class ServerConnection:
     address: str
@@ -20,6 +28,44 @@ class ServerConnection:
     
             
 MAX_HANDSHAKE_TIMEOUT = 2  # seconds
+
+
+def extract_send_response(
+        response:messenger_pb2.SendResponse
+    ) -> tuple[bool, str]:
+    return response.success, response.debug_message
+
+def extract_receive_all_response(
+        inbox: messenger_pb2.InboxResponse
+    ) -> list[tuple[int, str, str, str]]:
+    """_summary_
+
+    Args:
+        inbox (messenger_pb2.InboxResponse): _description_
+
+    Returns:
+        list[tuple[int, str, int, str]]: id, msg, self_email, dest_email    
+    """
+    
+    results = []
+    for msg_obj in inbox.messages:
+        
+        entry = (
+            msg_obj.id,
+            msg_obj.msg,
+            msg_obj.self_email,
+            msg_obj.dest_email
+        )
+        
+        results.append(entry)
+        
+    return results
+
+
+
+
+
+
 def connect_to_servers(server_addresses: list[str]) -> tuple[list[ServerConnection], list[str]]:
     """ 
         Attempts to connect to a list of server addresses.
@@ -47,7 +93,7 @@ def connect_to_servers(server_addresses: list[str]) -> tuple[list[ServerConnecti
  
 def send_messages(
         id: int, connections: list[ServerConnection], 
-        dest_message: str, dest_ip:str, dest_port: int
+        dest_message: str, self_email:str, dest_email: str
     ) -> list[str]:
     """
         Send message to all connected servers
@@ -59,8 +105,8 @@ def send_messages(
     send_payload = messenger_pb2.SendRequest(
         id=id,
         msg=dest_message,
-        sendport=dest_port,
-        sendip=dest_ip
+        self_email=self_email,
+        dest_email=dest_email
     )
     
     failure_servers = []
@@ -71,7 +117,7 @@ def send_messages(
             
         except grpc.RpcError as e:
             failure_servers.append(conn.address)
-    
+           
     
     return failure_servers
 
@@ -80,7 +126,7 @@ def send_messages(
 # Warning: This is an extremly naive implementation for demo purposes only.
 # All messages are being returned: handling duplicates is done at a higher layer.
 def receive_all_messages(
-        connections: list[ServerConnection], self_ip:str, self_port:int
+        connections: list[ServerConnection], self_email:str,
     ) -> tuple[list[tuple[messenger_pb2.InboxResponse, str]], list[str]]:
     """
         Retrieve all messages from all connected servers.
@@ -89,10 +135,7 @@ def receive_all_messages(
         In a real-world app, these would correspond to actual user identifiers.
     """
 
-    receive_payload = messenger_pb2.ReceiveRequest(
-        selfport=self_port,
-        selfip=self_ip
-    )
+    receive_payload = messenger_pb2.ReceiveRequest(self_email=self_email)
 
     failure_servers = []
     inboxes = []
@@ -102,37 +145,14 @@ def receive_all_messages(
             inboxes.append([inbox, conn.address])   
             
 
-        except grpc.RpcError:
+        except grpc.RpcError as e:
             failure_servers.append(conn.address)
+            print(e)
             
     return inboxes, failure_servers
 
 
-def read_inbox_response(
-        inbox: messenger_pb2.InboxResponse
-    ) -> list[tuple[int, str, int, str]]:
-    """_summary_
 
-    Args:
-        inbox (messenger_pb2.InboxResponse): _description_
-
-    Returns:
-        list[tuple[int, str, int, str]]: id, ip, port, message    
-    """
-    
-    results = []
-    for msg_obj in inbox.messages:
-        
-        entry = (
-            msg_obj.id,
-            msg_obj.sendip,
-            msg_obj.sendport,
-            msg_obj.msg
-        )
-        
-        results.append(entry)
-        
-    return results
     
 
 
