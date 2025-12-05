@@ -52,28 +52,41 @@ def send_to_self(addr:list[str]) -> None:
         dest_email="example@gmail.com"
     )
     
+    failed_recvs = cli.send_messages(
+        id=102, 
+        connections=connections, 
+        dest_message="Hello from gRPC!! skeleton!",
+        self_email="example@gmail.com",
+        dest_email="example@gmail.com"
+    )
+
     for addr in failure_addrs:
         print(f"Failure when sending to: {addr}")
+        
+
+           
     
     inbox_list_per_server:list[tuple[messenger_pb2.InboxResponse, str]]
-    failed_recvs:list[str]
-    inbox_list_per_server, failed_recvs = cli.receive_all_messages(
-        connections=connections, 
+    inbox_list_per_server = cli.receive_all_messages(
+        connections=connections,
         self_email="example@gmail.com",
     )
-    
-    for addr in failed_recvs:
-        print(f"Failure when receiving from: {addr}")
+
+    print(type(inbox_list_per_server[0]))
+    for i, inbox in enumerate(inbox_list_per_server):
+        addr = connections[i].address
+        if inbox is None:
+            print(f"Failure when receiving from: {addr}")
+            continue
         
-    for inbox_ip in inbox_list_per_server:
-        inbox, ip = inbox_ip
+        print(type(inbox))
         messages = cli.extract_receive_all_response(inbox)
         
         for message in messages:
             id, msg, self_email, dest_email = message
-            print(f"server{ip}: [id: {id}, message: {msg}, received from: {self_email}]")
+            print(f"server{addr}: [id: {id}, message: {msg}, received from: {self_email}]")
 
 if __name__ == '__main__':
-    send_to_self(["localhost:50051"])
+    send_to_self(["localhost:50051", "localhost:50052", "localhost:50053"])
     
     

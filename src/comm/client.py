@@ -35,32 +35,30 @@ def extract_send_response(
     ) -> tuple[bool, str]:
     return response.success, response.debug_message
 
+import messenger_pb2
+
 def extract_receive_all_response(
-        inbox: messenger_pb2.InboxResponse
+        response: messenger_pb2.InboxResponse
     ) -> list[tuple[int, str, str, str]]:
-    """_summary_
-
-    Args:
-        inbox (messenger_pb2.InboxResponse): _description_
-
-    Returns:
-        list[tuple[int, str, int, str]]: id, msg, self_email, dest_email    
-    """
     
-    results = []
-    for msg_obj in inbox.messages:
+    output_list = []
+    
+    # 1. Access the repeated field by its name in the .proto ('messages')
+    # This acts strictly like a Python list
+    for msg in response.messages:
         
-        entry = (
-            msg_obj.id,
-            msg_obj.msg,
-            msg_obj.self_email,
-            msg_obj.dest_email
-        )
+        # 2. 'msg' is now a single SendRequest object.
+        # Access its fields directly using dot notation.
+        # (Replace these attribute names with the actual ones from your .proto)
+        msg_id = msg.id          # int
+        sender = msg.msg      # str
+        recipient = msg.self_email # str
+        body = msg.dest_email          # str
         
-        results.append(entry)
-        
-    return results
+        # 3. Create the tuple and append
+        output_list.append((msg_id, sender, recipient, body))
 
+    return output_list
 
 
 
@@ -127,7 +125,7 @@ def send_messages(
 # All messages are being returned: handling duplicates is done at a higher layer.
 def receive_all_messages(
         connections: list[ServerConnection], self_email:str,
-    ) -> tuple[list[tuple[messenger_pb2.InboxResponse, str]], list[str]]:
+    ) ->list[messenger_pb2.InboxResponse | None]:
     """
         Retrieve all messages from all connected servers.
         
@@ -142,14 +140,14 @@ def receive_all_messages(
     for conn in connections:
         try:
             inbox = conn.stub.ReceiveAll(receive_payload, timeout=2)
-            inboxes.append([inbox, conn.address])   
+            inboxes.append(inbox)   
             
 
         except grpc.RpcError as e:
-            failure_servers.append(conn.address)
+            inboxes.append(None)
             print(e)
             
-    return inboxes, failure_servers
+    return inboxes
 
 
 
