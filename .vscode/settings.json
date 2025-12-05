@@ -1,0 +1,7 @@
+{
+    "python.analysis.extraPaths": [
+        "./src/comm/grpc_messenger",
+        "./src/comm",
+        "./src"
+    ]
+}

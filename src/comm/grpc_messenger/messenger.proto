@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package messenger;
+
+// The Service Definition
+service MessengerService {
+  // Sends a message destined for a specific IP/Port
+  rpc Send (SendRequest) returns (SendResponse);
+
+  // Retrieves all messages waiting for the requester's IP/Port
+  rpc ReceiveAll (ReceiveRequest) returns (InboxResponse);
+}
+
+// Data Structures
+
+message SendRequest {
+  int32 id = 1;
+  string msg = 2;
+  int32 sendport = 3;  // The destination port
+  string sendip = 4;   // The destination IP
+}
+
+// Extensibility
+message SendResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ReceiveRequest {
+  int32 selfport = 1; // Identifying who is asking
+  string selfip = 2;
+}
+
+message InboxResponse {
+  repeated SendRequest messages = 1; // Returns a list of the original message objects
+}

@@ -1,0 +1,1 @@
+Execute src/compile_proto.sh
