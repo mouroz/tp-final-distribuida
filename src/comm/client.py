@@ -191,9 +191,11 @@ def extract_receive_all_unique_responses(
             # Add the message with minimum ID
             results.append(responses[min_id[1]][counters[min_id[1]]])
             
-            # Advance all counters that have this same ID (remove duplicates)
+            # Advance all counters that have this same ID and sender address (remove duplicates)
+            minID_sender_addrs = responses[min_id[1]][counters[min_id[1]]][1]
             for i in range(len(responses)):
-                if counters[i] < len(responses[i]) and ids[i] == min_id[0]:
+                I_sender_addrs = responses[i][counters[i]][1]
+                if counters[i] < len(responses[i]) and ids[i] == min_id[0] and I_sender_addrs == minID_sender_addrs:
                     counters[i] += 1
 
     return results
