@@ -189,7 +189,15 @@ def extract_receive_all_unique_responses(
             all_read_messages = True
         else:
             # Add the message with minimum ID
-            results.append(responses[min_id[1]][counters[min_id[1]]])
+
+            repeatedMessage = False
+
+            for i in range(len(results)):
+                if results[i][0] == responses[min_id[1]][counters[min_id[1]]][0] and results[i][1] == responses[min_id[1]][counters[min_id[1]]][1]:
+                    repeatedMessage = True
+                    break
+            if not repeatedMessage:
+                results.append(responses[min_id[1]][counters[min_id[1]]])
             
             # Advance all counters that have this same ID and sender address (remove duplicates)
             minID_sender_addrs = responses[min_id[1]][counters[min_id[1]]][1]
