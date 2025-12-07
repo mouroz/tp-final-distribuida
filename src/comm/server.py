@@ -68,7 +68,12 @@ def serve_syncronous_server(ip:str, port:int):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=const_max_workers))
     messenger_pb2_grpc.add_MessengerServiceServicer_to_server(MessengerService(), server)
     
-    bind_address = f'{ip}:{port}'
+    # IPv6 addresses need brackets, e.g. [::]:50051 or [2804:14c:...]:50051
+    if ':' in ip and not ip.startswith('['):
+        bind_address = f'[{ip}]:{port}'
+    else:
+        bind_address = f'{ip}:{port}'
+    
     server.add_insecure_port(bind_address)
     print(f"Server started. Listening on {bind_address} ...")
     

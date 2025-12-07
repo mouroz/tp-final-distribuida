@@ -64,6 +64,20 @@ def extract_receive_all_response(
 
 
 
+def format_address_for_grpc(addr: str) -> str:
+    """Format address for gRPC - IPv6 addresses need brackets around the IP part."""
+    # If already has brackets or no colons (IPv4/hostname), return as-is
+    if '[' in addr or addr.count(':') <= 1:
+        return addr
+    
+    # IPv6 address without brackets - split IP and port, add brackets
+    # Format: 2804:14c:...:1dfa:50051 -> [2804:14c:...:1dfa]:50051
+    last_colon = addr.rfind(':')
+    ip_part = addr[:last_colon]
+    port_part = addr[last_colon+1:]
+    return f'[{ip_part}]:{port_part}'
+
+
 def connect_to_servers(server_addresses: list[str]) -> tuple[list[ServerConnection], list[str]]:
     """ 
         Attempts to connect to a list of server addresses.
@@ -74,7 +88,8 @@ def connect_to_servers(server_addresses: list[str]) -> tuple[list[ServerConnecti
     failed_connections = []
     
     for addr in server_addresses:
-        channel = grpc.insecure_channel(addr)
+        formatted_addr = format_address_for_grpc(addr)
+        channel = grpc.insecure_channel(formatted_addr)
         try:
             # Force handshake to ensure its connectable
             grpc.channel_ready_future(channel).result(timeout=MAX_HANDSHAKE_TIMEOUT)
