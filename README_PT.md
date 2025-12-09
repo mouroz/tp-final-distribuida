@@ -4,8 +4,11 @@
 [Português](README_PT.md)
 
 # Como executar
+## Dependências
 
-Primeiro, certifique-se de que você possui as dependências corretas instaladas. Dentro da pasta raiz do projeto:
+Certifique-se que tenha no sistema python > 3.10 e pip, conda ou mamba instalados no sistema
+
+Primeiro, certifique-se de que você possui as dependências corretas instaladas. Dentro da pasta raiz do projeto, execute:
 
 ```
 pip install -r requirements # Se tiver usando pip
@@ -18,6 +21,14 @@ conda env create -f enviroment.yml # Se tiver usando conda
 ```
 mamba env create -f enviroment.yml # Se tiver usando mamba
 ```
+
+## Executar aplicativo
+
+No diretório raiz, execute:
+```
+python app.py
+``` 
+
 
 
 # Módulos
