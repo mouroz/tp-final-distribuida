@@ -1,27 +1,40 @@
-# Comunication Module
+# Languages
 
-Handles the backbone of communication between the cliente and server, as well as the queue and active replication mechanisms. [See more](src/comm/README.md)
+[English](README.md)
+[Portuguese](README_PT.md)
 
+# How to run
 
-# Developer Information
+First make sure you have the correct dependencies. Inside the root folder of the project:
 
-The structure of this project is highly sensitive to changes in the directory structure (a file belonging to src/comm cannot be moved elsewhere).
-
-Other than that, python files (atleast for comm/ and test/comm_test.py) currently can be executed from anywhere and imported from other scripts without breaking, if the proper sys.path location is provided
-
-## Recompile proto:
-**Changing names on proto is extremely prone to breaking! Only do this as developer**
 ```
-sudo chmod +x src/comm/grpc_messager/compile_proto.sh
-src/comm/grpc_messager/compile_proto.sh
+pip install -r requirements # When using pip
 ```
 
-## Start server: 
 ```
-python src/comm/server.py --ip=[::] --port=50051
+conda env create -f enviroment.yml # When using conda
 ```
 
-## Start client test:
 ```
-python src/test/comm_test.py
+mamba env create -f enviroment.yml # When using mamba
 ```
+
+
+
+# Modules
+
+## Comunication Module
+
+Handles the backbone of communication between the cliente and server, as well as the queue and active replication mechanisms. Inside src/comm [See more](src/comm/README.md)
+
+
+## Interface Module
+
+Interface logic for application window using pyqt6. Currently directly inside src/ as a single file (src/ui.py)
+
+
+## Test Modules
+
+Test scripts used throughout the application to test functionality
+
+

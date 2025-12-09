@@ -2,22 +2,14 @@ name: grpc_messenger
 channels:
   - conda-forge
   - defaults
+
 dependencies:
-  # Core Python
   - python=3.10
-  
-  # gRPC Runtime (for server.py and client.py)
   - grpcio
-  
-  # gRPC Tools (for generating the code from messenger.proto)
   - grpcio-tools
-  
-  # Google Protocol Buffers
   - protobuf
-  
   - mypy-protobuf
-  
-  - asyncio
-  
-  # Pip included for any non-conda packages you might add later
   - pip
+
+  - pip:
+    - PyQt6

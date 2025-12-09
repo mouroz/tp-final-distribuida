@@ -14,11 +14,12 @@ if src_dir not in sys.path:
 
 from PyQt6.QtWidgets import QApplication
 from ui import ServerConfigWindow
-
+import signal 
 
 def main():
     """Main entry point - starts the PyQt application."""
     app = QApplication(sys.argv)
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
     
     # Set application metadata
     app.setApplicationName("Messenger Distribuído")
