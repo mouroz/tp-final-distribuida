@@ -2,7 +2,21 @@
 import sys
 import os
 import grpc
+import time
+import functools
 from dataclasses import dataclass
+
+def measure_time(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        
+        duration = (end_time - start_time) * 1000 # Converter para ms
+        print(f" [{func.__name__}] executou em {duration:.2f} ms")
+        return result
+    return wrapper
 
 
 
@@ -37,6 +51,7 @@ def extract_send_response(
 
 import messenger_pb2
 
+@measure_time
 def extract_receive_all_response(
         response: messenger_pb2.InboxResponse
     ) -> list[tuple[int, str, str, str]]:
@@ -104,6 +119,7 @@ def connect_to_servers(server_addresses: list[str]) -> tuple[list[ServerConnecti
 
 
  
+@measure_time
 def send_messages(
         id: int, connections: list[ServerConnection], 
         dest_message: str, self_email:str, dest_email: str
@@ -138,6 +154,7 @@ def send_messages(
 
 # Warning: This is an extremly naive implementation for demo purposes only.
 # All messages are being returned: handling duplicates is done at a higher layer.
+@measure_time
 def receive_all_messages(
         connections: list[ServerConnection], self_email:str,
     ) ->list[messenger_pb2.InboxResponse | None]:
@@ -169,69 +186,59 @@ def extract_receive_all_unique_responses(
     ) -> list[tuple[int, str, str, str]]:
     """Function that merges multiple inbox responses, removing duplicates based on message ID. Assumes each inbox is sorted by ID.
     Args:
-        inbox_list: List of inbox responses (or None for failed servers)
+        inbox_list (list[tuple[messenger_pb2.InboxResponse, str]]): List of tuples containing inbox response and server IP
     Returns:
         list[tuple[int, str, str, str]]: id, msg, self_email, dest_email    
     """
-    unique_messages = []  # antes: results
-    messages_per_server = []  # antes: server
-    read_positions = [0] * len(inbox_list)  # antes: counters
+    results = []
+    responses = []
+    counters = [0] * len(inbox_list)
 
     # Extract messages from each inbox response
-    for server_index, inbox in enumerate(inbox_list):
-        extracted_messages = extract_receive_all_response(inbox)
-        if extracted_messages is None:
-            extracted_messages = []
-        messages_per_server.append(extracted_messages)
-        read_positions[server_index] = 0
+    for i, inbox in enumerate(inbox_list):
+        response = extract_receive_all_response(inbox)
+        if response is None:
+            response = []
+        responses.append(response)
+        counters[i] = 0
     
-    # Merge servers while removing duplicates based on message ID
-    all_messages_processed = False  # antes: all_read_messages
-    while not all_messages_processed:
-        current_ids = [0] * len(messages_per_server)  # antes: ids
-        lowest_id_info = (sys.maxsize, -1)  # (message_id, server_index) - antes: min_id
+    # Merge responses while removing duplicates based on message ID
+    all_read_messages = False
+    while not all_read_messages:
+        ids = [0] * len(responses)
+        min_id = (sys.maxsize, -1)  # (id, index)
         
         # Find minimum ID among current positions
-        for server_index in range(len(messages_per_server)):
-            if read_positions[server_index] < len(messages_per_server[server_index]):
-                current_message_id = messages_per_server[server_index][read_positions[server_index]][0]
-                current_ids[server_index] = current_message_id
-                if current_message_id < lowest_id_info[0]:
-                    lowest_id_info = (current_message_id, server_index)
+        for i in range(len(responses)):
+            if counters[i] < len(responses[i]):
+                current_id = responses[i][counters[i]][0]
+                ids[i] = current_id
+                if current_id < min_id[0]:
+                    min_id = (current_id, i)
         
         # If no more messages to read
-        if lowest_id_info[1] == -1:
-            all_messages_processed = True
+        if min_id[1] == -1:
+            all_read_messages = True
         else:
             # Add the message with minimum ID
-            is_duplicate = False  # antes: repeatedMessage
-            server_with_lowest_id = lowest_id_info[1]  # para clareza
-            
-            for result_index in range(len(unique_messages)):
-                current_result = unique_messages[result_index]
-                candidate_message = messages_per_server[server_with_lowest_id][read_positions[server_with_lowest_id]]
-                
-                # Check if same ID and same sender (msg field is the sender)
-                if current_result[0] == candidate_message[0] and current_result[1] == candidate_message[1]:
-                    is_duplicate = True
+
+            repeatedMessage = False
+
+            for i in range(len(results)):
+                if results[i][0] == responses[min_id[1]][counters[min_id[1]]][0] and results[i][1] == responses[min_id[1]][counters[min_id[1]]][1]:
+                    repeatedMessage = True
                     break
-                    
-            if not is_duplicate:
-                unique_messages.append(messages_per_server[server_with_lowest_id][read_positions[server_with_lowest_id]])
+            if not repeatedMessage:
+                results.append(responses[min_id[1]][counters[min_id[1]]])
             
             # Advance all counters that have this same ID and sender address (remove duplicates)
-            lowest_message_sender = messages_per_server[server_with_lowest_id][read_positions[server_with_lowest_id]][1]
-            
-            for server_index in range(len(messages_per_server)):
-                if read_positions[server_index] < len(messages_per_server[server_index]):
-                    current_message_sender = messages_per_server[server_index][read_positions[server_index]][1]
-                    has_same_id = current_ids[server_index] == lowest_id_info[0]
-                    has_same_sender = current_message_sender == lowest_message_sender
-                    
-                    if has_same_id and has_same_sender:
-                        read_positions[server_index] += 1
+            minID_sender_addrs = responses[min_id[1]][counters[min_id[1]]][1]
+            for i in range(len(responses)):
+                I_sender_addrs = responses[i][counters[i]][1]
+                if counters[i] < len(responses[i]) and ids[i] == min_id[0] and I_sender_addrs == minID_sender_addrs:
+                    counters[i] += 1
 
-    return unique_messages
+    return results
 
 
     
