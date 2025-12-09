@@ -14,7 +14,7 @@ def measure_time(func):
         end_time = time.perf_counter()
         
         duration = (end_time - start_time) * 1000 # Converter para ms
-        print(f"⏱️ [{func.__name__}] executou em {duration:.2f} ms")
+        print(f" [{func.__name__}] executou em {duration:.2f} ms")
         return result
     return wrapper
 
