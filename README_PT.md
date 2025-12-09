@@ -24,10 +24,19 @@ mamba env create -f enviroment.yml # Se tiver usando mamba
 
 ## Executar aplicativo
 
+
+### Client
 No diretório raiz, execute:
 ```
 python app.py
 ``` 
+
+
+### Server
+No diretório raiz, execute:
+```
+python src/comm/server.py
+```
 
 
 

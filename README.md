@@ -24,12 +24,17 @@ mamba env create -f enviroment.yml # When using mamba
 
 ## Run Application
 
+### Client
 On root directory, run:
 ```
 python app.py
 ``` 
 
-
+### Server
+On root directory, run:
+```
+python src/comm/server.py
+```
 
 # Modules
 
